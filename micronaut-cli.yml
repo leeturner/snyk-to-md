@@ -1,0 +1,6 @@
+applicationType: cli
+defaultPackage: com.leeturner
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: maven
+features: [annotation-api, app-name, junit, kotlin, kotlin-extension-functions, logback, maven, picocli, picocli-junit, picocli-kotlin-application, readme, serialization-jackson, shade, yaml]
