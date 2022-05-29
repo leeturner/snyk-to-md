@@ -8,12 +8,11 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
-@Command(name = "snyk-md", description = ["..."],
-        mixinStandardHelpOptions = true)
+@Command(name = "snyk-to-md", description = ["Export test json reports from the snyk CLI to markdown"], mixinStandardHelpOptions = true)
 class SnykMdCommand : Runnable {
 
     @Option(names = ["-v", "--verbose"], description = ["..."])
-    private var verbose : Boolean = false
+    private var verbose: Boolean = false
 
     override fun run() {
         // business logic here
@@ -23,7 +22,8 @@ class SnykMdCommand : Runnable {
     }
 
     companion object {
-        @JvmStatic fun main(args: Array<String>) {
+        @JvmStatic
+        fun main(args: Array<String>) {
             PicocliRunner.run(SnykMdCommand::class.java, *args)
         }
     }
