@@ -34,14 +34,7 @@ test-input: fmt vet build
 	${BIN_DARWIN} -i test-data/dummy-report.json 
 
 test-input-debug: fmt vet build
-<<<<<<< Updated upstream
 	${BIN_DARWIN} -d -i test-data/dummy-report.json
 
 test-input-pipe: fmt vet build
 	cat test-data/dummy-report.json | ${BIN_DARWIN}
-=======
-	${BIN_DARWIN} -d -i test-data/dummy-report.json 
-
-test-inline: fmt vet build
-	cat test-data/dummy-report.json | ${BIN_DARWIN} 
->>>>>>> Stashed changes
