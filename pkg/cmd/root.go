@@ -2,19 +2,28 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/leeturner/snyk-to-md/pkg/service"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
+	"strings"
+
+	"github.com/leeturner/snyk-to-md/pkg/log"
+	"github.com/leeturner/snyk-to-md/pkg/service"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
 	inputFlag = "input"
+	debugFlag = "debug"
 )
 
+type Config struct {
+	Input string `mapstructure:"input"`
+	Debug bool   `mapstructure:"debug"`
+}
+
 var (
-	// flags
-	input string
+	config Config
 
 	// definition of the root command
 	rootCmd = &cobra.Command{
@@ -23,38 +32,49 @@ var (
 		Long:    `The Snyk JSON to Markdown Mapper takes the json outputted from "snyk test --json" and creates a local markdown file displaying the vulnerabilities discovered.`,
 		Example: "snyk-to-md",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger, err := log.Setup(config.Debug)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
 			// if we have something in the input flag then we need load the contents of that file which will error if
 			// it doesn't exist an error if not.  Then we need to load the json file and parse it.  The input parameter
 			// will override whatever is being piped on the command line
 			if cmd.Flags().Changed(inputFlag) {
-				exists, err := doesFileExist(input)
-				if err != nil || !exists {
-					_, _ = fmt.Fprintln(os.Stderr, err.Error())
-					os.Exit(1)
-				}
-				// we know the file exists
-				markdown, err := service.Convert(input)
+				contents, err := getFileContent(config.Input, logger)
 				if err != nil {
-					_, _ = fmt.Fprintln(os.Stderr, err.Error())
+					logger.Error(err.Error())
 					os.Exit(1)
 				}
-				fmt.Printf(markdown)
+				resultMarkdown, err := service.Convert(contents, logger)
+				if err != nil {
+					logger.Error(err.Error())
+					os.Exit(1)
+				}
+				fmt.Println(resultMarkdown)
 				return
 			}
 
 			// if nothing in the input flag then we can load from stdin
 			stat, err := os.Stdin.Stat()
 			if err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, fmt.Errorf("could't read from stdin. error: %w", err))
+				logger.Error(err.Error())
 				os.Exit(1)
 			}
 			if (stat.Mode() & os.ModeCharDevice) == 0 {
 				bytes, err := io.ReadAll(os.Stdin)
 				if err != nil {
-					panic(err)
+					logger.Error(err.Error())
+					os.Exit(1)
 				}
-				str := string(bytes)
-				fmt.Println(str)
+				contents := string(bytes)
+				resultMarkdown, err := service.Convert(contents, logger)
+				if err != nil {
+					logger.Error(err.Error())
+					os.Exit(1)
+				}
+				fmt.Println(resultMarkdown)
 				return
 			}
 
@@ -63,17 +83,36 @@ var (
 	}
 )
 
-func init() {
-	fs := rootCmd.PersistentFlags()
-	fs.StringVarP(&input, inputFlag, "i", "", "input path from where to read the json. Defaults to stdin")
+// Main() runs the available Cobra commands
+func Main() {
+	cobra.CheckErr(Execute())
 }
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		_, err := fmt.Fprintln(os.Stderr, err)
-		if err != nil {
-			return
-		}
-		os.Exit(1)
+func Execute() error {
+	if err := initFlags(); err != nil {
+		return err
 	}
+	if err := rootCmd.Execute(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func initFlags() error {
+	fs := rootCmd.PersistentFlags()
+	fs.StringP("input", "i", "", "input path from where to read the json. Defaults to stdin")
+	fs.BoolP("debug", "d", false, "determines whether the application runs with debug log messages enable")
+
+	if err := viper.BindPFlags(fs); err != nil {
+		return err
+	}
+	cobra.OnInitialize(initConfig)
+	return nil
+}
+
+func initConfig() {
+	replacer := strings.NewReplacer("-", "_") // allowing env vars like 'example-variable' to be defined as EXAMPLE_VARIABLE
+	viper.SetEnvKeyReplacer(replacer)
+	viper.AutomaticEnv()     // read value from ENV variables
+	viper.Unmarshal(&config) // storing the whole config in a single struct
 }
