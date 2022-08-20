@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
@@ -38,47 +37,19 @@ var (
 				os.Exit(1)
 			}
 
-			// if we have something in the input flag then we need load the contents of that file which will error if
-			// it doesn't exist an error if not.  Then we need to load the json file and parse it.  The input parameter
-			// will override whatever is being piped on the command line
-			if cmd.Flags().Changed(inputFlag) {
-				contents, err := getFileContent(config.Input, logger)
-				if err != nil {
-					logger.Error(err.Error())
-					os.Exit(1)
-				}
-				resultMarkdown, err := service.Convert(contents, logger)
-				if err != nil {
-					logger.Error(err.Error())
-					os.Exit(1)
-				}
-				fmt.Println(resultMarkdown)
-				return
-			}
-
-			// if nothing in the input flag then we can load from stdin
-			stat, err := os.Stdin.Stat()
+			inputProvided := cmd.Flags().Changed(inputFlag) // App was called with -i or --input flag pointing to a file
+			contents, err := getContent(inputProvided, config.Input, logger)
 			if err != nil {
 				logger.Error(err.Error())
 				os.Exit(1)
 			}
-			if (stat.Mode() & os.ModeCharDevice) == 0 {
-				bytes, err := io.ReadAll(os.Stdin)
-				if err != nil {
-					logger.Error(err.Error())
-					os.Exit(1)
-				}
-				contents := string(bytes)
-				resultMarkdown, err := service.Convert(contents, logger)
-				if err != nil {
-					logger.Error(err.Error())
-					os.Exit(1)
-				}
-				fmt.Println(resultMarkdown)
-				return
-			}
 
-			fmt.Println("No input flag specified and nothing piped in on the command line")
+			resultMarkdown, err := service.Convert(contents, logger)
+			if err != nil {
+				logger.Error(err.Error())
+				os.Exit(1)
+			}
+			fmt.Println(resultMarkdown)
 		},
 	}
 )
@@ -100,8 +71,8 @@ func Execute() error {
 
 func initFlags() error {
 	fs := rootCmd.PersistentFlags()
-	fs.StringP("input", "i", "", "input path from where to read the json. Defaults to stdin")
-	fs.BoolP("debug", "d", false, "determines whether the application runs with debug log messages enable")
+	fs.StringP(inputFlag, "i", "", "input path from where to read the json. Defaults to stdin")
+	fs.BoolP(debugFlag, "d", false, "determines whether the application runs with debug log messages enable")
 
 	if err := viper.BindPFlags(fs); err != nil {
 		return err
