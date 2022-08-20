@@ -1,7 +1,7 @@
 package main
 
 import (
-	"snyk-to-md/cmd"
+	"github.com/leeturner/snyk-to-md/pkg/cmd"
 )
 
 func main() {
