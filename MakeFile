@@ -29,3 +29,6 @@ test:
 
 clean:
 	rm -rf bin/
+
+test-input: fmt vet build
+	${BIN_DARWIN} -i test-data/dummy-report.json
