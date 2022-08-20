@@ -8,10 +8,10 @@ CMD_SRC = ./main.go
 .PHONY: all build vet fmt clean
 
 $(BIN_DARWIN): $(SOURCES)
-	GOARCH=arm64 GOOS=darwin go build -o $(BIN_DARWIN) $(CMD_SRC)
+	GOOS=darwin go build -o $(BIN_DARWIN) $(CMD_SRC)
 
 $(BIN_LINUX): $(SOURCES)
-	GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -o $(BIN_LINUX) $(CMD_SRC)
+	GOOS=linux CGO_ENABLED=0 go build -o $(BIN_LINUX) $(CMD_SRC)
 
 build: $(BIN_DARWIN) $(BIN_LINUX)
 
@@ -31,4 +31,7 @@ clean:
 	rm -rf bin/
 
 test-input: fmt vet build
-	${BIN_DARWIN} -i test-data/dummy-report.json
+	${BIN_DARWIN} -i test-data/dummy-report.json 
+
+test-input-debug: fmt vet build
+	${BIN_DARWIN} -d -i test-data/dummy-report.json 

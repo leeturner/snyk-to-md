@@ -1,17 +1,11 @@
 package service
 
 import (
-	"log"
-	"os"
+	"go.uber.org/zap"
 )
 
-func Convert(jsonInput string) (string, error) {
-	log.Println("Converting ..")
-	log.Printf("jsonInput: %s", jsonInput)
-
-	contents, err := os.ReadFile(jsonInput)
-	if err != nil {
-		return "", err
-	}
-	return string(contents), nil
+func Convert(jsonInput string, logger zap.SugaredLogger) (string, error) {
+	logger.Debugf("Converting jsonInput... \n raw jsonInput: %s", jsonInput)
+	// TODO conversion
+	return jsonInput, nil
 }

@@ -3,34 +3,37 @@ package cmd
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 	"testing"
 )
 
-func TestDoesFileExist(t *testing.T) {
+func TestGetFileContent(t *testing.T) {
+	log := zaptest.NewLogger(t)
+	logger := *log.Sugar()
 	tests := []struct {
-		testName     string
-		fileName     string
-		expectedBool bool
-		expectedErr  error
+		testName    string
+		jsonInput   string
+		expectedMD  string
+		expectedErr error
 	}{
 		{
-			testName:     "file does not exist",
-			fileName:     "abc",
-			expectedBool: false,
-			expectedErr:  errors.New("could not open the file"),
+			testName:    "input file does not exist",
+			jsonInput:   "./doesnt-exist.txt",
+			expectedMD:  "",
+			expectedErr: errors.New("could not open the file"),
 		},
 		{
-			testName:     "file does exist",
-			fileName:     "../../test-data/dummy-report.json",
-			expectedBool: true,
-			expectedErr:  nil,
+			testName:    "input file does exist",
+			jsonInput:   "../../test-data/dummy-report.json",
+			expectedMD:  `{"ok": false}`,
+			expectedErr: nil,
 		},
 	}
 
 	for _, data := range tests {
 		t.Run(data.testName, func(t *testing.T) {
-			resultBool, resultErr := doesFileExist(data.fileName)
-			assert.Equal(t, data.expectedBool, resultBool)
+			resultMD, resultErr := getFileContent(data.jsonInput, logger)
+			assert.Equal(t, data.expectedMD, resultMD)
 			assert.Equal(t, data.expectedErr, resultErr)
 		})
 	}
