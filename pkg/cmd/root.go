@@ -12,13 +12,15 @@ import (
 )
 
 const (
-	inputFlag = "input"
-	debugFlag = "debug"
+	inputFlag  = "input"
+	outputFlag = "output"
+	debugFlag  = "debug"
 )
 
 type Config struct {
-	Input string `mapstructure:"input"`
-	Debug bool   `mapstructure:"debug"`
+	Input  string `mapstructure:"input"`
+	Output string `mapstructure:"output"`
+	Debug  bool   `mapstructure:"debug"`
 }
 
 var (
@@ -31,7 +33,7 @@ var (
 		Long:    `The Snyk JSON to Markdown Mapper takes the json outputted from "snyk test --json" and creates a local markdown file displaying the vulnerabilities discovered.`,
 		Example: "snyk-to-md",
 		Run: func(cmd *cobra.Command, args []string) {
-			logger, err := log.Setup(config.Debug)
+			logger, err := log.Setup(config.Debug) // We pass it whether the App was called with -d or --debug flag
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
@@ -49,7 +51,9 @@ var (
 				logger.Error(err.Error())
 				os.Exit(1)
 			}
-			fmt.Println(resultMarkdown)
+
+			outputProvided := cmd.Flags().Changed(outputFlag) // App was called with -o or --output flag pointing to a file
+			exportResults(outputProvided, config.Output, resultMarkdown, logger)
 		},
 	}
 )
@@ -72,6 +76,7 @@ func Execute() error {
 func initFlags() error {
 	fs := rootCmd.PersistentFlags()
 	fs.StringP(inputFlag, "i", "", "input path from where to read the json. Defaults to stdin")
+	fs.StringP(outputFlag, "o", "false", "when provided, the converted markdown will be exported to the provided file")
 	fs.BoolP(debugFlag, "d", false, "determines whether the application runs with debug log messages enable")
 
 	if err := viper.BindPFlags(fs); err != nil {
