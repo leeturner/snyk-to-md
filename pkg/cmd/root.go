@@ -46,7 +46,7 @@ var (
 				os.Exit(1)
 			}
 
-			resultMarkdown, err := service.Convert(contents, logger)
+			resultMarkdown, err := service.Convert(contents, false, false, logger)
 			if err != nil {
 				logger.Error(err.Error())
 				os.Exit(1)
