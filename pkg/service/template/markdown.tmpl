@@ -1,0 +1,13 @@
+# Snyk test report
+
+{{ .DependencyCount }} dependencies
+
+{{ with .Vulnerabilities }}
+{{ range .}}
+
+# {{ .Title }}
+
+{{ .Description }}
+
+{{ end }}
+{{ end }}
