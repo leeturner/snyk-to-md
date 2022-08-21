@@ -38,3 +38,6 @@ test-input-debug: fmt vet build
 
 test-input-pipe: fmt vet build
 	cat test-data/dummy-report.json | ${BIN_DARWIN}
+
+test-output-file: fmt vet build
+	cat test-data/dummy-report.json | ${BIN_DARWIN} -o ./test-output.md

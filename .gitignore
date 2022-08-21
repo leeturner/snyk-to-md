@@ -3,3 +3,5 @@ Thumbs.db
 .idea
 *.iml
 bin
+test-output.md
+.vscode
