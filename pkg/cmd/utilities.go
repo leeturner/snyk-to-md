@@ -56,7 +56,7 @@ func exportResults(outputProvided bool, fileName string, contents string, logger
 }
 
 func writeToFile(fileName string, contents string, logger zap.SugaredLogger) error {
-	logger.Debug("Writing to file...")
+	logger.Infof("Vulnerability snapshot saved at %s", fileName)
 	err := os.WriteFile(fileName, []byte(contents), 0644)
 	if err != nil {
 		return fmt.Errorf("Couldn't write to file: %s", err)
