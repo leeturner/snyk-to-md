@@ -49,19 +49,22 @@ func getStdInContent(logger zap.SugaredLogger) (string, error) {
 // in which case it exports the string to the output file.
 func exportResults(outputProvided bool, fileName string, contents string, logger zap.SugaredLogger) error {
 	if outputProvided {
-		logger.Debug("Writing to file...")
-		err := writeToFile(fileName, contents)
-		if err != nil {
-			return fmt.Errorf("Couldn't write to file: %s", err)
-		}
-		return nil
+		return writeToFile(fileName, contents, logger)
 	}
-	logger.Debug("Writing to STDOUT...")
-	fmt.Println(contents)
+	writeToStdOut(contents, logger)
 	return nil
 }
 
-func writeToFile(fileName string, content string) error {
-	err := os.WriteFile(fileName, []byte(content), 0644)
+func writeToFile(fileName string, contents string, logger zap.SugaredLogger) error {
+	logger.Debug("Writing to file...")
+	err := os.WriteFile(fileName, []byte(contents), 0644)
+	if err != nil {
+		return fmt.Errorf("Couldn't write to file: %s", err)
+	}
 	return err
+}
+
+func writeToStdOut(contents string, logger zap.SugaredLogger) {
+	logger.Debug("Writing to STDOUT...")
+	fmt.Println(contents)
 }
