@@ -29,10 +29,10 @@ func TestConvert(t *testing.T) {
 		},
 		{
 			testName:           "valid snyk json with 1 vulnerability",
-			jsonInput:          readTestFileContents("test-report-1-vuln.json"),
+			jsonInput:          readTestFileContents("test-report-1-vuln.json", t),
 			displayOnlySummary: false,
 			displayRemediation: false,
-			expectedMD:         readTestFileContents("expected-test-report-1-vuln.md"),
+			expectedMD:         readTestFileContents("expected-test-report-1-vuln.md", t),
 			expectedErr:        nil,
 		},
 	}
@@ -46,10 +46,10 @@ func TestConvert(t *testing.T) {
 	}
 }
 
-func readTestFileContents(fileName string) string {
+func readTestFileContents(fileName string, t *testing.T) string {
 	contents, err := os.ReadFile("../../test-data/" + fileName)
 	if err != nil {
-		return ""
+		t.Errorf("unable to read test file %s: %s", fileName, err)
 	}
 	return string(contents)
 }
