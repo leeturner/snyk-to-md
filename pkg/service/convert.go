@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"go.uber.org/zap"
+	"strings"
 	"text/template"
 )
 
 const (
-	defaultTemplate = "markdown.tmpl"
+	defaultTemplate        = "markdown.tmpl"
+	defaultRemediationText = "## Remediation\nThere is no remediation at the moment"
 )
 
 var (
@@ -19,20 +21,26 @@ var (
 	snykJson SnykJson
 )
 
-type Vulnerability struct {
-	Title       string
-	ModuleName  string
-	PackageName string
-	Language    string
-	Description string
-}
-
 type SnykJson struct {
 	DisplayOnlySummary bool
 	DisplayRemediation bool
 	OK                 bool
 	Vulnerabilities    []Vulnerability
 	DependencyCount    int
+}
+
+type Vulnerability struct {
+	Id             string
+	Title          string
+	Credit         []string
+	ModuleName     string
+	PackageName    string
+	Language       string
+	PackageManager string
+	Description    string
+	Summary        string
+	Severity       string
+	From           []string
 }
 
 func Convert(jsonInput string, displayOnlySummary bool, displayRemediation bool, logger zap.SugaredLogger) (string, error) {
@@ -59,4 +67,19 @@ func Convert(jsonInput string, displayOnlySummary bool, displayRemediation bool,
 		return "", errors.New("unable to parse snyk template file")
 	}
 	return markdown.String(), nil
+}
+
+/*
+ * This method trys to find the remediation text in the description and returns it if
+ * it is there. If it is return from the remediation title to the end of the description.
+ */
+func getRemediation(description string) string {
+	var index = strings.Index(description, "## Remediation")
+	if index > -1 {
+		return description[index:]
+	}
+	// TODO: if no remediation text in the description, try the fixedIn data
+	// see - https://github.com/snyk/snyk-to-html/blob/9b8b23702286b1c1e1cdd327659c641b5ed2dbde/src/lib/snyk-to-html.ts#L408
+	// if all else fails fall back to the default text
+	return defaultRemediationText
 }

@@ -1,13 +1,18 @@
 # Snyk test report
 
-{{ .DependencyCount }} dependencies
+{{ len .Vulnerabilities }} known vulnerabilities | {{ .DependencyCount }} dependencies
+{{ with .Vulnerabilities }} {{ range .}}
+## ({{.Severity}} severity) {{ .Title }}
 
-{{ with .Vulnerabilities }}
-{{ range .}}
+* Package Manager: {{ .PackageManager }}
+* Vulnerable Module: {{ .ModuleName }}
+* Introduced through: {{if gt (len .From) 2}} {{ index .From 0 }}, {{ index .From 1}} and others {{else}} {{ .From }} {{end}}
 
-# {{ .Title }}
+### Detailed paths
+
+* Introduced through: {{ .From }}
 
 {{ .Description }}
 
-{{ end }}
-{{ end }}
+[More about this vulnerability](https://snyk.io/vuln/{{.Id}})
+{{ end }} {{ end }}

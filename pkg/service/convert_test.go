@@ -35,6 +35,14 @@ func TestConvert(t *testing.T) {
 			expectedMD:         readTestFileContents("expected-test-report-1-vuln.md", t),
 			expectedErr:        nil,
 		},
+		{
+			testName:           "valid snyk json with 1 vulnerability and 1 from item",
+			jsonInput:          readTestFileContents("test-report-1-vuln-1-from-item.json", t),
+			displayOnlySummary: false,
+			displayRemediation: false,
+			expectedMD:         readTestFileContents("expected-test-report-1-vuln-1-from-item.md", t),
+			expectedErr:        nil,
+		},
 	}
 
 	for _, data := range tests {

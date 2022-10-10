@@ -6,11 +6,11 @@
 
 * Package Manager: npm
 * Vulnerable Module: brace-expansion
-* Introduced through:  goof@0.0.3, tap@5.8.0 and others 
+* Introduced through:  [goof@0.0.3] 
 
 ### Detailed paths
 
-* Introduced through: [goof@0.0.3 tap@5.8.0 nyc@6.6.1 glob@7.0.3 minimatch@3.0.0 brace-expansion@1.1.4]
+* Introduced through: [goof@0.0.3]
 
 ## Overview
 [`brace-expansion`](https://www.npmjs.com/package/brace-expansion) is a package that performs brace expansion as known from sh/bash.
